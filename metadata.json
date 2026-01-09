@@ -1,0 +1,8 @@
+{
+  "name": "Copy of Copy of Copy of Rina AI pro３",
+  "description": "Chat with Rina, your customizable AI partner.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation"
+  ]
+}
