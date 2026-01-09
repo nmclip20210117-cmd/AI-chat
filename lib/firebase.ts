@@ -1,4 +1,6 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
+
+// Fix: Importing from @firebase/app instead of firebase/app to resolve TypeScript errors regarding missing exported members
+import { initializeApp, getApps, getApp } from '@firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 

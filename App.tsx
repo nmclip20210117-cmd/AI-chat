@@ -267,21 +267,40 @@ const App: React.FC = () => {
 
         <main className="flex-grow relative w-full overflow-hidden flex flex-col">
           {activeTab === 'voice' && (
-            <div className="w-full h-full flex flex-col items-center justify-center relative fade-in">
-               <div className="w-full max-w-lg aspect-square relative flex items-center justify-center">
-                  <div className={`absolute inset-0 transition-opacity duration-1000 ${isConnected ? 'opacity-100' : 'opacity-30 blur-md'}`}><Visualizer isActive={isConnected} analyzerRef={audioAnalyzerRef} mode={mode} /></div>
-                  <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-700 ${isConnected ? 'scale-110' : 'scale-100'}`}>{renderAvatar(currentAI.gender, "w-48 h-48")}</div>
-                  
-                  <div className="absolute top-[12%] w-full px-8 pointer-events-none z-30 flex flex-col items-center gap-2">
-                    {aiTranscript && <div className="animate-in fade-in slide-in-from-top-4 bg-black/70 backdrop-blur-xl px-5 py-3 rounded-2xl border border-pink-500/20 max-w-[90%] shadow-2xl"><p className="text-pink-100 text-sm font-medium text-center leading-relaxed italic">"{aiTranscript}"</p></div>}
+            <div className="w-full h-full flex flex-col items-center justify-between py-6 relative fade-in">
+               
+               {/* Top Transcription: AI Speaker */}
+               <div className="w-full px-6 min-h-[60px] flex flex-col items-center justify-center z-30">
+                  {aiTranscript && (
+                    <div className="animate-in fade-in slide-in-from-top-4 bg-black/70 backdrop-blur-xl px-5 py-3 rounded-2xl border border-pink-500/20 max-w-[95%] shadow-2xl">
+                        <p className="text-pink-100 text-sm font-medium text-center leading-relaxed italic">
+                          "{aiTranscript}"
+                        </p>
+                    </div>
+                  )}
+               </div>
+
+               {/* Center: Visualizer & Avatar */}
+               <div className="relative w-full max-w-lg aspect-square flex items-center justify-center">
+                  <div className={`absolute inset-0 transition-opacity duration-1000 ${isConnected ? 'opacity-100' : 'opacity-30 blur-md'}`}>
+                    <Visualizer isActive={isConnected} analyzerRef={audioAnalyzerRef} mode={mode} />
                   </div>
-                  
-                  <div className="absolute bottom-[22%] w-full px-8 pointer-events-none z-30 flex flex-col items-center gap-2">
-                    {userTranscript && <div className="animate-in fade-in slide-in-from-bottom-4 bg-white/5 backdrop-blur-lg px-4 py-2 rounded-xl border border-zinc-700/50 max-w-[85%]"><p className="text-zinc-300 text-xs font-medium text-center">{userTranscript}</p></div>}
+                  <div className={`absolute transition-all duration-700 ${isConnected ? 'scale-110' : 'scale-100'}`}>
+                    {renderAvatar(currentAI.gender, "w-40 h-40 md:w-56 md:h-56")}
                   </div>
                </div>
 
-               <div className="mt-8 mb-4 flex flex-col items-center gap-5 z-20 shrink-0">
+               {/* Bottom Transcription: User Listener */}
+               <div className="w-full px-6 min-h-[40px] flex flex-col items-center justify-center z-30">
+                  {userTranscript && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 bg-white/5 backdrop-blur-lg px-4 py-2 rounded-xl border border-zinc-700/50 max-w-[85%]">
+                      <p className="text-zinc-300 text-xs font-medium text-center">{userTranscript}</p>
+                    </div>
+                  )}
+               </div>
+
+               {/* Controls */}
+               <div className="flex flex-col items-center gap-5 z-20 shrink-0">
                   <button onClick={handleToggleConnection} disabled={isConnecting || !isConfigValid} className={`relative group overflow-hidden px-14 py-5 rounded-full font-bold tracking-[0.2em] text-sm transition-all duration-500 touch-manipulation shadow-2xl shadow-pink-900/20 ${isConnected ? 'bg-red-500/10 text-red-500 border border-red-500/40' : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white active:scale-95'}`}>
                     <span className="relative z-10">{isConnecting ? '接続中...' : isConnected ? 'さよなら' : `${currentAI.name}と話す`}</span>
                   </button>

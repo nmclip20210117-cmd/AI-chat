@@ -25,15 +25,21 @@
         padding: 0;
         width: 100%;
         height: 100%;
-        overflow: hidden; /* Disable browser-level scrolling */
         background-color: #050505;
         font-family: 'Inter', 'Noto Sans JP', sans-serif;
         -webkit-tap-highlight-color: transparent;
         overscroll-behavior: none;
       }
+      /* Allow scrolling on body if content overflows, especially for mobile login */
+      body {
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
       #root {
-        height: 100dvh;
+        min-height: 100dvh;
         width: 100%;
+        display: flex;
+        flex-direction: column;
       }
     </style>
 <script type="importmap">
@@ -45,7 +51,8 @@
     "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
     "firebase/": "https://esm.sh/firebase@^12.7.0/",
     "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "@firebase/app": "https://esm.sh/@firebase/app@^0.14.6"
   }
 }
 </script>

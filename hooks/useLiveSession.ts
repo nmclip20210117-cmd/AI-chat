@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality, FunctionDeclaration, Type } from '@google/genai';
 import { createBlob, base64ToUint8Array, decodeAudioData } from '../utils/audio';
 
@@ -57,6 +57,10 @@ export const useLiveSession = (): UseLiveSessionReturn => {
   
   const [userTranscript, setUserTranscript] = useState("");
   const [aiTranscript, setAiTranscript] = useState("");
+  
+  // Refs to accumulate transcription chunks
+  const userTranscriptRef = useRef("");
+  const aiTranscriptRef = useRef("");
 
   const inputAudioContextRef = useRef<AudioContext | null>(null);
   const outputAudioContextRef = useRef<AudioContext | null>(null);
@@ -104,6 +108,10 @@ export const useLiveSession = (): UseLiveSessionReturn => {
         activeSessionRef.current = null;
     }
     await releaseAudioResources();
+    setUserTranscript("");
+    setAiTranscript("");
+    userTranscriptRef.current = "";
+    aiTranscriptRef.current = "";
   }, [releaseAudioResources]);
 
   const connect = useCallback(async (config: SessionConfig, aiProfile: AIProfile, memoryContext: string, onSaveMemory: (text: string) => void) => {
@@ -186,11 +194,15 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                     },
                     onmessage: async (msg: LiveServerMessage) => {
                         const { serverContent, toolCall } = msg;
+                        
                         if (serverContent?.interrupted) {
                             stopAllAudio();
                             setMode('listening');
+                            aiTranscriptRef.current = "";
+                            setAiTranscript("");
                             return;
                         }
+
                         if (toolCall && toolCall.functionCalls) {
                             for (const fc of toolCall.functionCalls) {
                                 if (fc.name === 'saveMemory' && (fc.args as any).content) {
@@ -203,12 +215,34 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                                 }
                             }
                         }
-                        if (serverContent?.inputTranscription?.text) setUserTranscript(serverContent.inputTranscription.text);
-                        if (serverContent?.outputTranscription?.text) setAiTranscript(serverContent.outputTranscription.text);
+
+                        // Accumulate user transcription
+                        if (serverContent?.inputTranscription?.text) {
+                            userTranscriptRef.current += serverContent.inputTranscription.text;
+                            setUserTranscript(userTranscriptRef.current);
+                        }
+                        
+                        // Accumulate AI transcription
+                        if (serverContent?.outputTranscription?.text) {
+                            aiTranscriptRef.current += serverContent.outputTranscription.text;
+                            setAiTranscript(aiTranscriptRef.current);
+                        }
+
+                        // Reset transcripts on turn complete
+                        if (serverContent?.turnComplete) {
+                            // We don't clear immediately to let user read, 
+                            // but we clear the accumulators for the next turn.
+                            userTranscriptRef.current = "";
+                            aiTranscriptRef.current = "";
+                        }
                         
                         const base64Audio = serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
                         if (base64Audio && outputAudioContextRef.current) {
                             setMode('speaking');
+                            // Clear user transcript when AI starts speaking
+                            setUserTranscript("");
+                            userTranscriptRef.current = "";
+
                             nextStartTimeRef.current = Math.max(nextStartTimeRef.current, outputAudioContextRef.current.currentTime);
                             const buffer = await decodeAudioData(base64ToUint8Array(base64Audio), outputAudioContextRef.current);
                             const source = outputAudioContextRef.current.createBufferSource();
