@@ -144,7 +144,7 @@ const App: React.FC = () => {
       setUser(currentUser);
       if (currentUser && !isCloudSyncDisabled) {
         try {
-          const docSnap = await timeoutPromise(getDoc(doc(db, "users", currentUser.uid)), 2000) as DocumentSnapshot | null;
+          const docSnap = await timeoutPromise(getDoc(doc(db, "users", currentUser.uid)), 3000) as DocumentSnapshot | null;
           if (docSnap?.exists()) {
             const data = docSnap.data();
             if (data) {
@@ -180,7 +180,10 @@ const App: React.FC = () => {
         try { await timeoutPromise(setDoc(doc(db, "users", user.uid), { ...newConfig, updatedAt: Date.now() }, { merge: true }), 2000); }
         catch(e) { setIsCloudSyncDisabled(true); }
     }
-    if (setupMode === 'initial') setTimeout(() => setShowOnboarding(true), 1200);
+    if (setupMode === 'initial') {
+        setShowProfileSetup(false);
+        setTimeout(() => setShowOnboarding(true), 500);
+    }
   };
 
   const handleLogout = async () => {
@@ -321,69 +324,35 @@ const App: React.FC = () => {
                     </div>
                 </div>
 
-                {/* --- SUPER PROMINENT FIXED SUPPORT SECTION --- */}
+                {/* Support Section */}
                 <div className="shrink-0 p-4 border-t border-zinc-800 bg-black/80 backdrop-blur-xl pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3">
                     <button 
                         onClick={() => { setShowDonationModal(true); setIsSidebarOpen(false); }}
                         className="relative w-full overflow-hidden flex items-center gap-4 p-5 rounded-[2rem] bg-gradient-to-br from-pink-600 via-purple-600 to-indigo-700 text-white shadow-2xl shadow-pink-900/40 group active:scale-95 transition-all"
                     >
-                        {/* Shimmer Effect */}
                         <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] pointer-events-none"></div>
-                        
                         <div className="relative z-10 w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">💌</div>
                         <div className="relative z-10 text-left">
                             <p className="font-black text-sm tracking-widest uppercase">Support Project</p>
-                            <p className="text-[10px] text-pink-100/80 font-medium">開発者を応援・支援する</p>
-                        </div>
-                        <div className="ml-auto relative z-10 text-pink-200 group-hover:translate-x-1 transition-transform">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" /></svg>
+                            <p className="text-[10px] text-pink-100/80 font-medium">開発者を支援する（100円〜）</p>
                         </div>
                     </button>
 
                     <div className="flex gap-2">
-                        <button 
-                            onClick={() => { setShowOnboarding(true); setIsSidebarOpen(false); }}
-                            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 text-blue-400 hover:bg-zinc-800 transition-colors text-xs font-bold active:scale-95"
-                        >
-                            <span>❓</span> ガイド
-                        </button>
-                        <button 
-                            onClick={handleLogout}
-                            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 text-zinc-400 hover:bg-zinc-800 transition-colors text-xs font-bold active:scale-95"
-                        >
-                            <span>🚪</span> 出る
-                        </button>
-                    </div>
-
-                    <div className="pt-1 px-1 opacity-50">
-                        <p className="text-[8px] text-zinc-500 font-bold uppercase truncate tracking-widest text-center">Account: {user.email}</p>
+                        <button onClick={() => { setShowOnboarding(true); setIsSidebarOpen(false); }} className="flex-1 py-3 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 text-blue-400 text-xs font-bold active:scale-95">❓ ガイド</button>
+                        <button onClick={handleLogout} className="flex-1 py-3 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 text-zinc-400 text-xs font-bold active:scale-95">🚪 ログアウト</button>
                     </div>
                 </div>
             </aside>
         </div>
       )}
 
-      {/* Global CSS for Animations */}
       <style>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #333;
-          border-radius: 2px;
-        }
-        .safe-area-inset {
-           padding-left: env(safe-area-inset-left);
-           padding-right: env(safe-area-inset-right);
-        }
-        /* Mobile specific tweaks */
-        @media (max-width: 640px) {
-          main { height: calc(100dvh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
-        }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        .safe-area-inset { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+        @media (max-width: 640px) { main { height: calc(100dvh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); } }
       `}</style>
     </div>
   );

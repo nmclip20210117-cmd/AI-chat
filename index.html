@@ -9,48 +9,31 @@
     <!-- PWA Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="KOKORO（心）" />
+    <meta name="apple-mobile-web-app-title" content="KOKORO" />
     <link rel="apple-touch-icon" href="https://api.iconify.design/fluent-emoji:sparkling-heart.svg" />
-    <link rel="manifest" href="manifest.json" />
 
     <!-- SEO & OGP -->
-    <title>KOKORO（心） - 心を通わせるAI</title>
-    <meta name="description" content="AI partner that shares your heart. Powered by Gemini 2.5." />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="KOKORO（心） - 心を通わせるAI" />
-    <meta property="og:description" content="心を通わせるAI「KOKORO（心）」。あなたのパートナーとして、自然な会話と記憶を共有します。" />
-    <meta property="og:image" content="https://api.iconify.design/fluent-emoji:sparkling-heart.svg" />
-    <meta name="twitter:card" content="summary" />
+    <title>KOKORO（心）</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-      body {
-        font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden; /* Disable browser-level scrolling */
         background-color: #050505;
-        color: #fce7f3;
-        user-select: none; 
-        -webkit-user-select: none;
+        font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        -webkit-tap-highlight-color: transparent;
         overscroll-behavior: none;
       }
-      .fade-in {
-        animation: fadeIn 0.8s ease-out;
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #333;
-        border-radius: 3px;
+      #root {
+        height: 100dvh;
+        width: 100%;
       }
     </style>
 <script type="importmap">

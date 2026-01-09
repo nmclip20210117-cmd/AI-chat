@@ -1,6 +1,4 @@
-
-// Standard modular Firebase v9+ configuration
-// Fix: Use named imports from 'firebase/app' to resolve TypeScript errors.
+// Fix: Use standard modular Firebase v9+ imports to resolve "no exported member" errors.
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -17,7 +15,6 @@ const firebaseConfig = {
 
 // Initialize Firebase with the modular SDK functions.
 // We use getApps() to check for existing instances to prevent re-initialization errors during development hot reloads.
-// Using named imports for initializeApp, getApps and getApp as per Firebase v9+ standards.
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Export Auth and Firestore services initialized with the app instance
