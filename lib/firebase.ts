@@ -1,4 +1,5 @@
-import * as firebaseApp from 'firebase/app';
+// Fixed the import error by ensuring standard v9+ Firebase imports and removing unnecessary leading whitespace
+import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -12,7 +13,6 @@ const firebaseConfig = {
   measurementId: "G-3E3VBRHBBH"
 };
 
-// Use type casting to bypass potential type mismatch where initializeApp is not found in the module exports
-const app = (firebaseApp as any).initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);

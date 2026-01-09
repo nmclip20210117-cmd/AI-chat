@@ -1,11 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { AIProfile } from '../hooks/useLiveSession';
 import { GoogleGenAI, Type } from '@google/genai';
 
 interface AIEditorProps {
   existingAI?: AIProfile;
-  apiKey: string;
   onSave: (ai: AIProfile) => void;
   onClose: () => void;
   onDelete?: (id: string) => void;
@@ -21,7 +19,7 @@ const VOICES = [
 
 const RELATIONSHIPS = ['友達', '親友', '恋人', '妹', '弟', '兄', '姉', '後輩', '先輩', '先生', '執事/メイド'];
 
-const AIEditor: React.FC<AIEditorProps> = ({ existingAI, apiKey, onSave, onClose, onDelete }) => {
+const AIEditor: React.FC<AIEditorProps> = ({ existingAI, onSave, onClose, onDelete }) => {
   const [name, setName] = useState(existingAI?.name || '');
   const [gender, setGender] = useState(existingAI?.gender || 'Female');
   const [voice, setVoice] = useState(existingAI?.voice || 'Aoede');
@@ -44,11 +42,12 @@ const AIEditor: React.FC<AIEditorProps> = ({ existingAI, apiKey, onSave, onClose
   }, []);
 
   const handleMagicGenerate = async () => {
-      if (!magicPrompt.trim() || !apiKey) return;
+      if (!magicPrompt.trim()) return;
       setIsMagicGenerating(true);
 
       try {
-        const ai = new GoogleGenAI({ apiKey });
+        // Exclusively use process.env.API_KEY as per guidelines
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
         // Generate Profile Text (JSON)
         const profileResponse = await ai.models.generateContent({
@@ -92,7 +91,7 @@ const AIEditor: React.FC<AIEditorProps> = ({ existingAI, apiKey, onSave, onClose
 
       } catch (e: any) {
           console.error("Magic Generation failed:", e);
-          alert("自動生成に失敗しました。APIキーを確認してください。");
+          alert("自動生成に失敗しました。しばらく待ってから再度お試しください。");
       } finally {
           setIsMagicGenerating(false);
       }

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { SessionConfig, AIProfile } from '../hooks/useLiveSession';
@@ -58,7 +57,8 @@ const TextChat: React.FC<TextChatProps> = ({ config, aiProfile, memoryContext, o
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: config.apiKey });
+      // Exclusively use process.env.API_KEY as per guidelines
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const now = new Date().toLocaleString('ja-JP', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
       
       const systemPrompt = `

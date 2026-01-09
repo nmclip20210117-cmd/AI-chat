@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLiveSession, SessionConfig, AIProfile } from './hooks/useLiveSession';
 import { useChatMemory } from './hooks/useChatMemory';
@@ -61,7 +60,7 @@ const App: React.FC = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [config, setConfig] = useState<SessionConfig>({
-    apiKey: localStorage.getItem('gemini_api_key') || process.env.API_KEY || "",
+    // Removed API key from initial config to follow guidelines
     userName: localStorage.getItem('rina_user_name') || "",
     userGender: localStorage.getItem('rina_user_gender') || "指定なし",
   });
@@ -77,8 +76,8 @@ const App: React.FC = () => {
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  const isDefaultKey = !localStorage.getItem('gemini_api_key') && config.apiKey === process.env.API_KEY;
-  const isConfigValid = !!config.apiKey && !!config.userName;
+  // Configuration check based on username
+  const isConfigValid = !!config.userName;
 
   useEffect(() => {
     const savedCustoms = localStorage.getItem('rina_custom_ais');
@@ -102,7 +101,8 @@ const App: React.FC = () => {
           return p.name !== original.name || 
                  p.relationship !== original.relationship || 
                  p.personality !== original.personality ||
-                 p.voice !== original.voice;
+                 p.voice !== original.voice ||
+                 p.gender !== original.gender;
       });
       localStorage.setItem('rina_custom_ais', JSON.stringify(toSave));
       setAiProfiles(updatedProfiles);
@@ -143,8 +143,11 @@ const App: React.FC = () => {
           if (docSnap?.exists()) {
             const data = docSnap.data();
             if (data) {
-              setConfig(prev => ({ ...prev, apiKey: data.apiKey || prev.apiKey, userName: data.userName || prev.userName, userGender: data.userGender || prev.userGender }));
-              if (data.apiKey && data.apiKey !== process.env.API_KEY) localStorage.setItem('gemini_api_key', data.apiKey);
+              const newConfig = { 
+                userName: data.userName || config.userName, 
+                userGender: data.userGender || config.userGender 
+              };
+              setConfig(newConfig);
               if (data.userName) localStorage.setItem('rina_user_name', data.userName);
               if (data.userGender) localStorage.setItem('rina_user_gender', data.userGender);
             }
@@ -166,15 +169,13 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (error === "QUOTA_EXCEEDED") {
-      setSetupMode('upgrade');
-      setShowProfileSetup(true);
+      // In this version, we no longer prompt for custom API keys
+      console.warn("API quota exceeded");
     }
   }, [error]);
 
   const handleSaveConfig = async (newConfig: SessionConfig) => {
     setConfig(newConfig);
-    if (newConfig.apiKey && newConfig.apiKey !== process.env.API_KEY) localStorage.setItem('gemini_api_key', newConfig.apiKey.trim());
-    else localStorage.removeItem('gemini_api_key');
     localStorage.setItem('rina_user_name', newConfig.userName.trim());
     localStorage.setItem('rina_user_gender', newConfig.userGender);
     if (user && !isCloudSyncDisabled) {
@@ -202,7 +203,7 @@ const App: React.FC = () => {
   const getErrorMessage = (errCode: string | null) => {
     if (!errCode) return null;
     switch(errCode) {
-      case "QUOTA_EXCEEDED": return "API利用制限（1分あたりの上限）に達しました。独自のAPIキーを設定してください。";
+      case "QUOTA_EXCEEDED": return "API利用制限（1分あたりの上限）に達しました。しばらく待ってから再度お試しください。";
       case "NETWORK_ERROR": return "ネットワークエラーが発生しました。接続を確認してください。";
       case "INIT_FAILED": return "マイクの初期化に失敗しました。";
       case "CONNECTION_ERROR": return "サーバーとの通信エラーが発生しました。";
@@ -231,7 +232,7 @@ const App: React.FC = () => {
       {showMemoryModal && (
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
               <div className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in" onClick={() => setShowMemoryModal(false)}></div>
-              <div className="relative w-full max-sm bg-zinc-900 border border-zinc-700 rounded-2xl p-5 shadow-2xl animate-in zoom-in-95">
+              <div className="relative w-full max-w-sm bg-zinc-900 border border-zinc-700 rounded-2xl p-5 shadow-2xl animate-in zoom-in-95">
                   <div className="flex items-center gap-2 mb-3"><span className="text-xl">🧠</span><h3 className="font-bold text-white">記憶を追加</h3></div>
                   <form onSubmit={async (e) => { e.preventDefault(); setMemorySaveStatus('saving'); await new Promise(r => setTimeout(r, 500)); addMemory(quickMemoryInput.trim()); setMemorySaveStatus('saved'); setTimeout(() => { setMemorySaveStatus('idle'); setQuickMemoryInput(""); setShowMemoryModal(false); }, 1000); }}>
                       <textarea value={quickMemoryInput} onChange={(e) => setQuickMemoryInput(e.target.value)} className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 text-sm text-white focus:ring-1 focus:ring-pink-500 outline-none resize-none h-24 mb-4" placeholder="覚えたよって言うまでもないことを入力..." autoFocus />
@@ -241,7 +242,7 @@ const App: React.FC = () => {
           </div>
       )}
 
-      {isAIEditorOpen && <AIEditor existingAI={editingAI} apiKey={config.apiKey} onSave={handleSaveAI} onClose={() => setIsAIEditorOpen(false)} onDelete={handleDeleteAI} />}
+      {isAIEditorOpen && <AIEditor existingAI={editingAI} onSave={handleSaveAI} onClose={() => setIsAIEditorOpen(false)} onDelete={handleDeleteAI} />}
       {showProfileSetup && <ProfileSetup config={config} onSave={handleSaveConfig} mode={setupMode} onClose={() => setShowProfileSetup(false)} serverError={error} />}
       {showDonationModal && <DonationModal onClose={() => setShowDonationModal(false)} />}
       {showOnboarding && <OnboardingModal onClose={() => setShowOnboarding(false)} onOpenDonation={() => { setShowOnboarding(false); setShowDonationModal(true); }} aiName={currentAI.name} />}
@@ -252,7 +253,6 @@ const App: React.FC = () => {
             <aside className="relative w-[85%] max-w-sm h-full bg-zinc-900 border-r border-zinc-800 shadow-2xl flex flex-col animate-in slide-in-from-left duration-300">
                 <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-black/20"><h2 className="font-bold text-zinc-100 flex items-center gap-2"><span className="text-xl">⚙️</span> メニュー</h2><button onClick={() => setIsSidebarOpen(false)} className="p-2 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-800"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" /></svg></button></div>
                 <div className="flex-grow overflow-y-auto flex flex-col">
-                    {isDefaultKey && <div className="p-4 pb-0"><button onClick={() => { setSetupMode('upgrade'); setShowProfileSetup(true); setIsSidebarOpen(false); }} className="w-full bg-gradient-to-r from-yellow-900/40 to-yellow-600/20 border border-yellow-600/50 rounded-xl p-3 flex items-center justify-between group hover:brightness-125 transition-all"><div className="flex flex-col items-start"><span className="text-yellow-400 font-bold text-sm flex items-center gap-1"><span>⚡</span> APIキー設定</span><span className="text-[10px] text-yellow-200/70">制限を解除して利用する</span></div><span className="text-yellow-500 group-hover:translate-x-1 transition-transform">→</span></button></div>}
                     <div className="p-4"><div className="flex items-center justify-between mb-2 px-1"><h3 className="text-xs font-bold text-zinc-500 uppercase">AIパートナー</h3><button onClick={() => { setEditingAI(undefined); setIsAIEditorOpen(true); setIsSidebarOpen(false); }} className="text-xs text-pink-400 hover:text-pink-300 flex items-center gap-1"><span>+ 作成</span></button></div><div className="space-y-2">{aiProfiles.map(ai => (<div key={ai.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${currentAIId === ai.id ? 'bg-zinc-800 border-pink-500/50 shadow-sm' : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'}`} onClick={() => { setCurrentAIId(ai.id); if(isConnected) disconnect(); }}><div className="flex items-center gap-3">{renderAvatar(ai.gender, "w-10 h-10")}<div><p className={`text-sm font-bold ${currentAIId === ai.id ? 'text-white' : 'text-zinc-300'}`}>{ai.name}</p><p className="text-[10px] text-zinc-500">{ai.relationship}</p></div></div><div className="flex items-center gap-2">{currentAIId === ai.id && <span className="w-2 h-2 rounded-full bg-pink-500"></span>}<button onClick={(e) => { e.stopPropagation(); setEditingAI(ai); setIsAIEditorOpen(true); setIsSidebarOpen(false); }} className="p-1.5 text-zinc-500 hover:text-white rounded hover:bg-zinc-700">⚙️</button></div></div>))}</div></div>
                     <div className="h-px bg-zinc-800 mx-4 my-2"></div>
                     <div className="p-4 flex flex-col gap-6"><div className="bg-zinc-800/30 rounded-xl p-3 border border-zinc-800"><div className="flex items-center justify-between"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center text-lg shadow-lg">{config.userGender === "女性" ? "👩" : "🧑"}</div><div><p className="text-sm font-bold text-white">{config.userName || "ゲスト"}</p><p className="text-[10px] text-zinc-400 uppercase tracking-wider">{config.userGender}</p></div></div><button onClick={() => { setSetupMode('edit'); setShowProfileSetup(true); setIsSidebarOpen(false); }} className="p-2 bg-zinc-800 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M7.84 1.804A1 1 0 018.82 1h2.36a1 1 0 01.98.804l.331 1.652a6.993 6.993 0 011.929 1.115l1.598-.54a1 1 0 011.186.447l1.18 2.044a1 1 0 01-.205 1.251l-1.267 1.113a7.047 7.047 0 010 2.228l1.267 1.113a1 1 0 01.206 1.25l-1.18 2.045a1 1 0 01-1.187.447l-1.598-.54a6.993 6.993 0 01-1.929 1.115l-.33 1.652a1 1 0 01-.98.804H8.82a1 1 0 01-.98-.804l-.331-1.652a6.993 6.993 0 01-1.929-1.115l-1.598.54a1 1 0 01-1.186-.447l-1.18-2.044a1 1 0 01.205-1.251l1.267-1.114a7.047 7.047 0 010-2.227L1.821 7.773a1 1 0 01-.206-1.25l1.18-2.045a1 1 0 011.187-.447l1.598.54A6.993 6.993 0 017.51 3.456l.33-1.652zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" /></svg></button></div></div><div className="flex-grow min-h-[250px] border border-zinc-800 bg-black/20 rounded-xl p-3"><MemoryManager memories={memories} onUpdate={updateMemory} onDelete={deleteMemory} onAdd={addMemory}/></div></div>

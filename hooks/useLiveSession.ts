@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality, FunctionDeclaration, Type, LiveSession } from '@google/genai';
 import { createBlob, base64ToUint8Array, decodeAudioData } from '../utils/audio';
@@ -10,7 +9,7 @@ const NOISE_GATE_HOLD_FRAMES = 60;
 const MAX_RECONNECT_ATTEMPTS = 5; 
 
 export interface SessionConfig {
-  apiKey: string;
+  // Removed apiKey from SessionConfig to follow security and SDK guidelines
   userName: string;
   userGender: string;
 }
@@ -177,7 +176,8 @@ export const useLiveSession = (): UseLiveSessionReturn => {
             setIsConnecting(true);
             await initializeAudio();
             
-            const ai = new GoogleGenAI({ apiKey: config.apiKey || process.env.API_KEY });
+            // Exclusively use process.env.API_KEY as per guidelines
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
             const sessionPromise = ai.live.connect({
                 model: MODEL_NAME,
                 config: {
