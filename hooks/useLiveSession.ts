@@ -176,11 +176,11 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                             setMode('listening');
                             return;
                         }
-                        if (toolCall?.functionCalls) {
+                        // Use strict checking for functionCalls to satisfy TypeScript
+                        if (toolCall && toolCall.functionCalls) {
                             for (const fc of toolCall.functionCalls) {
                                 if (fc.name === 'saveMemory' && (fc.args as any).content) {
                                     onSaveMemory((fc.args as any).content);
-                                    // sendToolResponse expects functionResponses as an object, not an array
                                     sessionPromise.then(session => {
                                         session.sendToolResponse({
                                             functionResponses: { id: fc.id, name: fc.name, response: { result: "ok" } }

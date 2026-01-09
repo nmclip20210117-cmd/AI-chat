@@ -1,4 +1,3 @@
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -6,9 +5,10 @@ export default defineConfig({
   plugins: [react()],
   base: './',
   define: {
-    // process.env全体を空オブジェクトにせず、必要な環境変数を個別に定義
-    'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
-    'process.env': '({})' // フォールバックとしての空オブジェクト
+    // process.env.API_KEYを文字列として定義。Vercel等のビルド環境にある値を注入。
+    'process.env.API_KEY': JSON.stringify(process.env.API_KEY || ''),
+    // process.env全体を空のオブジェクトとして定義（Viteでのグローバル変数の衝突回避）
+    'process.env': '{}'
   },
   build: {
     outDir: 'dist',
