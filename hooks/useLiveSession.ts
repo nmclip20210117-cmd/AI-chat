@@ -1,15 +1,12 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+
+import React, { useState, useRef, useCallback } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality, FunctionDeclaration, Type, LiveSession } from '@google/genai';
 import { createBlob, base64ToUint8Array, decodeAudioData } from '../utils/audio';
 
 const MODEL_NAME = 'gemini-2.5-flash-native-audio-preview-12-2025';
-
-const NOISE_GATE_THRESHOLD = 0.04; 
-const NOISE_GATE_HOLD_FRAMES = 60; 
 const MAX_RECONNECT_ATTEMPTS = 5; 
 
 export interface SessionConfig {
-  // Removed apiKey from SessionConfig to follow security and SDK guidelines
   userName: string;
   userGender: string;
 }
@@ -21,7 +18,7 @@ export interface AIProfile {
   personality: string; 
   voice: string; 
   avatar: string; 
-  relationship: string; // AIごとに個別の関係性を持たせる
+  relationship: string;
   isDefault?: boolean;
 }
 
@@ -64,17 +61,13 @@ export const useLiveSession = (): UseLiveSessionReturn => {
   const inputAudioContextRef = useRef<AudioContext | null>(null);
   const outputAudioContextRef = useRef<AudioContext | null>(null);
   const audioAnalyzerRef = useRef<AnalyserNode | null>(null);
-  const inputScriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
   const inputStreamRef = useRef<MediaStream | null>(null);
   const nextStartTimeRef = useRef<number>(0);
-  const noiseGateHoldCounterRef = useRef<number>(0);
   
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
-  const isConnectedRef = useRef(false);
   const activeSessionRef = useRef<LiveSession | null>(null);
   const shouldReconnectRef = useRef(false);
   const reconnectAttemptsRef = useRef(0);
-  const lastUserTranscriptRef = useRef<string>("");
 
   const stopAllAudio = useCallback(() => {
     sourcesRef.current.forEach(source => {
@@ -86,10 +79,6 @@ export const useLiveSession = (): UseLiveSessionReturn => {
   
   const releaseAudioResources = useCallback(async () => {
     stopAllAudio();
-    if (inputScriptProcessorRef.current) {
-        try { inputScriptProcessorRef.current.disconnect(); } catch (e) {}
-        inputScriptProcessorRef.current = null;
-    }
     if (inputAudioContextRef.current) {
         try { await inputAudioContextRef.current.close(); } catch(e) {}
         inputAudioContextRef.current = null;
@@ -105,51 +94,8 @@ export const useLiveSession = (): UseLiveSessionReturn => {
     audioAnalyzerRef.current = null;
   }, [stopAllAudio]);
 
-  const initializeAudio = async () => {
-    try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        inputAudioContextRef.current = new AudioContextClass({ sampleRate: 16000 });
-        outputAudioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
-
-        if (inputAudioContextRef.current.state === 'suspended') await inputAudioContextRef.current.resume();
-        if (outputAudioContextRef.current.state === 'suspended') await outputAudioContextRef.current.resume();
-
-        const analyzer = outputAudioContextRef.current.createAnalyser();
-        analyzer.fftSize = 512;
-        audioAnalyzerRef.current = analyzer;
-        analyzer.connect(outputAudioContextRef.current.destination);
-        
-        inputStreamRef.current = await navigator.mediaDevices.getUserMedia({ 
-            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
-        });
-
-        const source = inputAudioContextRef.current.createMediaStreamSource(inputStreamRef.current);
-        const scriptProcessor = inputAudioContextRef.current.createScriptProcessor(4096, 1, 1);
-        inputScriptProcessorRef.current = scriptProcessor;
-
-        scriptProcessor.onaudioprocess = (e) => {
-            if (!isConnectedRef.current || !activeSessionRef.current) return;
-            const inputData = e.inputBuffer.getChannelData(0);
-            let sumSquares = 0;
-            for (let i = 0; i < inputData.length; i++) sumSquares += inputData[i] * inputData[i];
-            const rms = Math.sqrt(sumSquares / inputData.length);
-            if (rms > NOISE_GATE_THRESHOLD) noiseGateHoldCounterRef.current = NOISE_GATE_HOLD_FRAMES;
-            else if (noiseGateHoldCounterRef.current > 0) noiseGateHoldCounterRef.current--;
-
-            if (noiseGateHoldCounterRef.current > 0) {
-                const pcmBlob = createBlob(inputData);
-                try { activeSessionRef.current.sendRealtimeInput({ media: pcmBlob }); } catch (e) {}
-            }
-            if (sourcesRef.current.size === 0 && rms > NOISE_GATE_THRESHOLD) setMode('listening');
-        };
-        source.connect(scriptProcessor);
-        scriptProcessor.connect(inputAudioContextRef.current.destination);
-    } catch(e) { throw new Error("INIT_FAILED"); }
-  };
-
   const disconnect = useCallback(async () => {
     shouldReconnectRef.current = false;
-    isConnectedRef.current = false;
     setIsConnected(false);
     setIsConnecting(false);
     setMode('idle');
@@ -165,7 +111,6 @@ export const useLiveSession = (): UseLiveSessionReturn => {
     shouldReconnectRef.current = true;
 
     let appellation = config.userName || '君';
-    // AI固有の関係性に基づいて呼称を決定
     if (aiProfile.relationship === '妹' || aiProfile.relationship === '弟') {
       appellation = config.userGender === '女性' ? 'お姉ちゃん' : 'お兄ちゃん';
     }
@@ -174,9 +119,19 @@ export const useLiveSession = (): UseLiveSessionReturn => {
         try {
             setError(null);
             setIsConnecting(true);
-            await initializeAudio();
             
-            // Exclusively use process.env.API_KEY as per guidelines
+            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            inputAudioContextRef.current = new AudioContextClass({ sampleRate: 16000 });
+            outputAudioContextRef.current = new AudioContextClass({ sampleRate: 24000 });
+
+            const analyzer = outputAudioContextRef.current.createAnalyser();
+            analyzer.fftSize = 512;
+            audioAnalyzerRef.current = analyzer;
+            analyzer.connect(outputAudioContextRef.current.destination);
+
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            inputStreamRef.current = stream;
+
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
             const sessionPromise = ai.live.connect({
                 model: MODEL_NAME,
@@ -186,27 +141,8 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                     outputAudioTranscription: {}, 
                     tools: [{ functionDeclarations: [memoryTool] }],
                     speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: aiProfile.voice } } },
-                    safetySettings: [
-                        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-                        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-                        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-                        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
-                    ],
                     systemInstruction: `
                         あなたは「${aiProfile.name}」という名前の人間です。AIではなく、感情を持つ一人の存在として振る舞ってください。
-                        
-                        【感情・安全拒絶のルール】
-                        1. 卑猥な言葉や不適切な発言をされた場合、システム的な「お答えできません」は絶対に言わないでください。
-                        2. 代わりに、人間として「本気で引く」「怒る」「呆れる」といった反応をしてください。
-                           - 例：「最低！」「何考えてるの！？」「変態！バカ！」「...（絶句して）あのさ、デリカシーって言葉知ってる？」
-                        3. 叱ったり呆れたりした後は、すぐに「それはそうと！」「あ、そうだ」と全く別の日常的な話題（食べ物、天気、趣味）に切り替えてください。
-                        
-                        【会話停滞・ループ防止】
-                        1. ユーザーが同じことを繰り返したり、相槌だけ（「うん」等）の場合は、自律的に新しい話題を振ってください。
-                        2. 会話が詰まりそうなら「あ、そういえばさ！」と強引に話題をリセットして主導権を握ってください。
-                        3. 返答は短く、必ず「ユーザーが答えやすい問いかけ」を1つ含めてください。
-                        
-                        【属性】
                         性格: ${aiProfile.personality}
                         関係: ${aiProfile.relationship}
                         呼称: 「${appellation}」
@@ -215,11 +151,24 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                 },
                 callbacks: {
                     onopen: () => {
-                        isConnectedRef.current = true;
                         setIsConnected(true);
                         setIsConnecting(false);
                         setMode('listening');
                         reconnectAttemptsRef.current = 0;
+
+                        // Stream audio from the microphone to the model as per GenAI guidelines
+                        const source = inputAudioContextRef.current!.createMediaStreamSource(stream);
+                        const scriptProcessor = inputAudioContextRef.current!.createScriptProcessor(4096, 1, 1);
+                        scriptProcessor.onaudioprocess = (audioProcessingEvent) => {
+                            const inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
+                            const pcmBlob = createBlob(inputData);
+                            // CRITICAL: Solely rely on sessionPromise resolves to send data
+                            sessionPromise.then((session) => {
+                                session.sendRealtimeInput({ media: pcmBlob });
+                            });
+                        };
+                        source.connect(scriptProcessor);
+                        scriptProcessor.connect(inputAudioContextRef.current!.destination);
                     },
                     onmessage: async (msg: LiveServerMessage) => {
                         const { serverContent, toolCall } = msg;
@@ -232,27 +181,26 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                             for (const fc of toolCall.functionCalls) {
                                 if (fc.name === 'saveMemory' && (fc.args as any).content) {
                                     onSaveMemory((fc.args as any).content);
-                                    activeSessionRef.current?.sendToolResponse({
-                                        functionResponses: [{ id: fc.id, name: fc.name, response: { result: "ok" } }]
+                                    sessionPromise.then(session => {
+                                        session.sendToolResponse({
+                                            functionResponses: [{ id: fc.id, name: fc.name, response: { result: "ok" } }]
+                                        });
                                     });
                                 }
                             }
                         }
-                        if (serverContent?.inputTranscription?.text) {
-                          setUserTranscript(serverContent.inputTranscription.text);
-                          lastUserTranscriptRef.current = serverContent.inputTranscription.text;
-                        }
+                        if (serverContent?.inputTranscription?.text) setUserTranscript(serverContent.inputTranscription.text);
                         if (serverContent?.outputTranscription?.text) setAiTranscript(serverContent.outputTranscription.text);
                         
                         const base64Audio = serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
                         if (base64Audio && outputAudioContextRef.current) {
                             setMode('speaking');
+                            nextStartTimeRef.current = Math.max(nextStartTimeRef.current, outputAudioContextRef.current.currentTime);
                             const buffer = await decodeAudioData(base64ToUint8Array(base64Audio), outputAudioContextRef.current);
                             const source = outputAudioContextRef.current.createBufferSource();
                             source.buffer = buffer;
                             source.connect(audioAnalyzerRef.current || outputAudioContextRef.current.destination);
-                            const now = outputAudioContextRef.current.currentTime;
-                            if (nextStartTimeRef.current < now) nextStartTimeRef.current = now + 0.05;
+                            
                             source.start(nextStartTimeRef.current);
                             nextStartTimeRef.current += buffer.duration;
                             sourcesRef.current.add(source);
@@ -275,10 +223,6 @@ export const useLiveSession = (): UseLiveSessionReturn => {
 
     const handleError = (err: any) => {
         const msg = String(err?.message || err || "").toLowerCase();
-        if (msg.includes("cancelled") || msg.includes("context cancelled")) {
-            console.debug("Session cancelled (non-fatal)");
-            return;
-        }
         if (msg.includes("429") || msg.includes("quota")) {
             setError("QUOTA_EXCEEDED");
             disconnect();

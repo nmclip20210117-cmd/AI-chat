@@ -1,7 +1,8 @@
-// Fixed the import error by ensuring standard v9+ Firebase imports and removing unnecessary leading whitespace
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+
+// Fixed the import error by ensuring correct Firebase v9+ submodule imports
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCkVqFZSunYewWFImn9B9PawkvieqLyjag",

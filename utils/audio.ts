@@ -1,5 +1,7 @@
+
 import { Blob } from '@google/genai';
 
+// Implement decode manually as per guidelines
 export function base64ToUint8Array(base64: string): Uint8Array {
   const binaryString = atob(base64);
   const len = binaryString.length;
@@ -10,6 +12,7 @@ export function base64ToUint8Array(base64: string): Uint8Array {
   return bytes;
 }
 
+// Implement encode manually as per guidelines
 export function arrayBufferToBase64(bytes: Uint8Array): string {
   let binary = '';
   const len = bytes.byteLength;
@@ -19,6 +22,7 @@ export function arrayBufferToBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
+// Standard PCM decoding as shown in GenAI examples
 export async function decodeAudioData(
   data: Uint8Array,
   ctx: AudioContext,
@@ -38,17 +42,16 @@ export async function decodeAudioData(
   return buffer;
 }
 
+// createBlob updated to follow the GenAI Live API Session Setup example
 export function createBlob(data: Float32Array): Blob {
   const l = data.length;
   const int16 = new Int16Array(l);
   for (let i = 0; i < l; i++) {
-    // Clamp values to [-1, 1] range to prevent distortion
-    const s = Math.max(-1, Math.min(1, data[i]));
-    // Convert to 16-bit PCM
-    int16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    int16[i] = data[i] * 32768;
   }
   return {
     data: arrayBufferToBase64(new Uint8Array(int16.buffer)),
+    // The supported audio MIME type is 'audio/pcm'.
     mimeType: 'audio/pcm;rate=16000',
   };
 }

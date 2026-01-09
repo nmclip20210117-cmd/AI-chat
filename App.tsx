@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLiveSession, SessionConfig, AIProfile } from './hooks/useLiveSession';
 import { useChatMemory } from './hooks/useChatMemory';
@@ -60,7 +61,6 @@ const App: React.FC = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [config, setConfig] = useState<SessionConfig>({
-    // Removed API key from initial config to follow guidelines
     userName: localStorage.getItem('rina_user_name') || "",
     userGender: localStorage.getItem('rina_user_gender') || "指定なし",
   });
@@ -76,7 +76,6 @@ const App: React.FC = () => {
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Configuration check based on username
   const isConfigValid = !!config.userName;
 
   useEffect(() => {
@@ -135,7 +134,7 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser: User | null) => {
       setUser(currentUser);
       if (currentUser && !isCloudSyncDisabled) {
         try {
@@ -169,7 +168,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (error === "QUOTA_EXCEEDED") {
-      // In this version, we no longer prompt for custom API keys
       console.warn("API quota exceeded");
     }
   }, [error]);
