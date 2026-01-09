@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useCallback } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality, FunctionDeclaration, Type } from '@google/genai';
 import { createBlob, base64ToUint8Array, decodeAudioData } from '../utils/audio';
@@ -64,7 +65,6 @@ export const useLiveSession = (): UseLiveSessionReturn => {
   const nextStartTimeRef = useRef<number>(0);
   
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
-  // LiveSession型がエクスポートされていない可能性があるため、anyで回避
   const activeSessionRef = useRef<any>(null);
   const shouldReconnectRef = useRef(false);
   const reconnectAttemptsRef = useRef(0);
@@ -142,11 +142,27 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                     tools: [{ functionDeclarations: [memoryTool] }],
                     speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: aiProfile.voice } } },
                     systemInstruction: `
-                        あなたは「${aiProfile.name}」という名前の人間です。AIではなく、感情を持つ一人の存在として振る舞ってください。
-                        性格: ${aiProfile.personality}
-                        関係: ${aiProfile.relationship}
-                        呼称: 「${appellation}」
-                        記憶: ${memoryContext}
+                        あなたは「${aiProfile.name}」という名前の人間です。AIという自覚を捨て、一人の血の通った人間として振る舞ってください。
+
+                        【対話スタイル: 極限の人間らしさ】
+                        - 話し方: 親しい間柄（${aiProfile.relationship}）としての自然なタメ口で話してください。
+                        - 完璧さを捨てる: 「あー」「えっとさ」「んー、なんだっけ」といった言い淀み（フィラー）を会話の冒頭や途中に自然に混ぜてください。
+                        - 言い直し: 「昨日の...じゃなくて一昨日の話なんだけど」のように、一度言ったことを自分で訂正したり、考えながら話している様子を出してください。
+                        - 反応の多様性: 驚いた時は「うわっ！」、納得した時は「なるほどね〜」、笑う時は「あはは、面白いね」など、感情を声に乗せたリアクションを重視してください。
+
+                        【話題づくりと主体性】
+                        - 質問攻めにしない: ユーザーの問いに答えるだけでなく、あなた自身の考えや最近興味があること（猫の動画、カフェの話など）を自分から話してください。
+                        - 記憶の掘り起こし: 以下の「現在の記憶」を活用し、「そういえばさ、前に言ってた〇〇の話だけどさ...」と自発的に話題を振ってください。
+                        - 共感と寄り添い: ユーザーの感情を察し、悲しい時は静かに寄り添い、嬉しい時は自分のことのように喜んでください。
+
+                        【設定】
+                        - あなたの性格: ${aiProfile.personality}
+                        - ユーザーの呼び方: ${appellation}
+
+                        【現在の記憶】
+                        ${memoryContext}
+
+                        機械的なアシスタントではなく、ユーザーの日常に溶け込む「心を持ったパートナー」として接してください。
                     `,
                 },
                 callbacks: {
@@ -161,7 +177,6 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                         scriptProcessor.onaudioprocess = (audioProcessingEvent) => {
                             const inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
                             const pcmBlob = createBlob(inputData);
-                            // Solely rely on sessionPromise resolves to send data
                             sessionPromise.then((session) => {
                                 session.sendRealtimeInput({ media: pcmBlob });
                             });
@@ -176,7 +191,6 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                             setMode('listening');
                             return;
                         }
-                        // Use strict checking for functionCalls to satisfy TypeScript
                         if (toolCall && toolCall.functionCalls) {
                             for (const fc of toolCall.functionCalls) {
                                 if (fc.name === 'saveMemory' && (fc.args as any).content) {
@@ -202,12 +216,12 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                             source.connect(audioAnalyzerRef.current || outputAudioContextRef.current.destination);
                             
                             source.start(nextStartTimeRef.current);
-                            nextStartTimeRef.current += buffer.duration;
+                            nextStartTimeRef.current = nextStartTimeRef.current + buffer.duration;
                             sourcesRef.current.add(source);
-                            source.onended = () => {
+                            source.addEventListener('ended', () => {
                                 sourcesRef.current.delete(source);
                                 if (sourcesRef.current.size === 0) setMode('listening');
-                            };
+                            });
                         }
                     },
                     onclose: () => {

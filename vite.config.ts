@@ -6,9 +6,8 @@ export default defineConfig({
   base: './',
   define: {
     // process.env.API_KEYを文字列として定義。Vercel等のビルド環境にある値を注入。
-    'process.env.API_KEY': JSON.stringify(process.env.API_KEY || ''),
-    // process.env全体を空のオブジェクトとして定義（Viteでのグローバル変数の衝突回避）
-    'process.env': '{}'
+    'process.env.API_KEY': JSON.stringify(process.env.API_KEY || '')
+    // Prohibited: Do not define process.env globally as it can interfere with standard environment variable resolution.
   },
   build: {
     outDir: 'dist',

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AIProfile } from '../hooks/useLiveSession';
 import { GoogleGenAI, Type } from '@google/genai';
@@ -10,7 +11,8 @@ interface AIEditorProps {
 }
 
 const VOICES = [
-  { id: 'Aoede', label: 'Aoede (女性/元気)', gender: 'Female' },
+  // Fix: Replaced 'Aoede' with 'Zephyr' to match standard available voices.
+  { id: 'Zephyr', label: 'Zephyr (女性/元気)', gender: 'Female' },
   { id: 'Kore', label: 'Kore (女性/穏やか)', gender: 'Female' },
   { id: 'Fenrir', label: 'Fenrir (男性/深い)', gender: 'Male' },
   { id: 'Charon', label: 'Charon (男性/威厳)', gender: 'Male' },
@@ -22,7 +24,7 @@ const RELATIONSHIPS = ['友達', '親友', '恋人', '妹', '弟', '兄', '姉',
 const AIEditor: React.FC<AIEditorProps> = ({ existingAI, onSave, onClose, onDelete }) => {
   const [name, setName] = useState(existingAI?.name || '');
   const [gender, setGender] = useState(existingAI?.gender || 'Female');
-  const [voice, setVoice] = useState(existingAI?.voice || 'Aoede');
+  const [voice, setVoice] = useState(existingAI?.voice || 'Zephyr');
   const [relationship, setRelationship] = useState(existingAI?.relationship || '友達');
   const [personality, setPersonality] = useState(existingAI?.personality || '');
 
@@ -57,7 +59,7 @@ const AIEditor: React.FC<AIEditorProps> = ({ existingAI, onSave, onClose, onDele
                 The output must be a valid JSON object.
                 
                 Available Voices:
-                - Aoede: Female, Energetic, High pitch
+                - Zephyr: Female, Energetic, High pitch
                 - Kore: Female, Calm, Soothing
                 - Fenrir: Male, Deep, Strong
                 - Charon: Male, Dignified, Low
@@ -72,7 +74,7 @@ const AIEditor: React.FC<AIEditorProps> = ({ existingAI, onSave, onClose, onDele
                     properties: {
                         name: { type: Type.STRING },
                         gender: { type: Type.STRING, enum: ["Female", "Male"] },
-                        voice: { type: Type.STRING, enum: ["Aoede", "Kore", "Fenrir", "Charon", "Puck"] },
+                        voice: { type: Type.STRING, enum: ["Zephyr", "Kore", "Fenrir", "Charon", "Puck"] },
                         relationship: { type: Type.STRING },
                         personality: { type: Type.STRING, description: "System instruction in Japanese" }
                     },
