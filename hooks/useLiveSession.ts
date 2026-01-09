@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useCallback } from 'react';
-import { GoogleGenAI, LiveServerMessage, Modality, FunctionDeclaration, Type, LiveSession } from '@google/genai';
+import { GoogleGenAI, LiveServerMessage, Modality, FunctionDeclaration, Type } from '@google/genai';
 import { createBlob, base64ToUint8Array, decodeAudioData } from '../utils/audio';
 
 const MODEL_NAME = 'gemini-2.5-flash-native-audio-preview-12-2025';
@@ -65,7 +64,8 @@ export const useLiveSession = (): UseLiveSessionReturn => {
   const nextStartTimeRef = useRef<number>(0);
   
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
-  const activeSessionRef = useRef<LiveSession | null>(null);
+  // LiveSession型がエクスポートされていない可能性があるため、anyで回避
+  const activeSessionRef = useRef<any>(null);
   const shouldReconnectRef = useRef(false);
   const reconnectAttemptsRef = useRef(0);
 
@@ -156,13 +156,12 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                         setMode('listening');
                         reconnectAttemptsRef.current = 0;
 
-                        // Stream audio from the microphone to the model as per GenAI guidelines
                         const source = inputAudioContextRef.current!.createMediaStreamSource(stream);
                         const scriptProcessor = inputAudioContextRef.current!.createScriptProcessor(4096, 1, 1);
                         scriptProcessor.onaudioprocess = (audioProcessingEvent) => {
                             const inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
                             const pcmBlob = createBlob(inputData);
-                            // CRITICAL: Solely rely on sessionPromise resolves to send data
+                            // Solely rely on sessionPromise resolves to send data
                             sessionPromise.then((session) => {
                                 session.sendRealtimeInput({ media: pcmBlob });
                             });
@@ -177,13 +176,14 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                             setMode('listening');
                             return;
                         }
-                        if (toolCall) {
+                        if (toolCall?.functionCalls) {
                             for (const fc of toolCall.functionCalls) {
                                 if (fc.name === 'saveMemory' && (fc.args as any).content) {
                                     onSaveMemory((fc.args as any).content);
+                                    // sendToolResponse expects functionResponses as an object, not an array
                                     sessionPromise.then(session => {
                                         session.sendToolResponse({
-                                            functionResponses: [{ id: fc.id, name: fc.name, response: { result: "ok" } }]
+                                            functionResponses: { id: fc.id, name: fc.name, response: { result: "ok" } }
                                         });
                                     });
                                 }

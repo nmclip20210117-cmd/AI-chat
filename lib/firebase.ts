@@ -1,5 +1,4 @@
-
-// Fixed the import error by ensuring correct Firebase v9+ submodule imports
+// Ensure standard modular Firebase v9+ imports
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
