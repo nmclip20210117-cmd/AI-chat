@@ -87,14 +87,14 @@ const Auth: React.FC<AuthProps> = ({ user, onClose }) => {
 
   if (user) {
     return (
-      <div className="flex flex-col gap-4 animate-in fade-in">
-        <div className="bg-zinc-800/40 p-5 rounded-2xl border border-zinc-700/50">
-          <p className="text-[10px] text-zinc-500 font-bold uppercase mb-2 tracking-widest">ログイン中のアカウント</p>
-          <p className="text-white text-sm font-medium break-all">{user.email}</p>
+      <div className="flex flex-col gap-3 animate-in fade-in">
+        <div className="bg-zinc-800/40 p-4 rounded-2xl border border-zinc-700/50">
+          <p className="text-[10px] text-zinc-500 font-bold uppercase mb-1 tracking-widest">Logged in as</p>
+          <p className="text-white text-xs font-medium break-all">{user.email}</p>
         </div>
         <button 
           onClick={handleLogout}
-          className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-3 rounded-xl text-sm font-bold border border-zinc-700 transition-all active:scale-95"
+          className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-3 rounded-xl text-xs font-bold border border-zinc-700 transition-all active:scale-95"
         >
           ログアウト
         </button>
@@ -104,19 +104,19 @@ const Auth: React.FC<AuthProps> = ({ user, onClose }) => {
 
   return (
     <>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-5">
         {/* Tabs */}
         {!isReset && (
-          <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5">
+          <div className="flex bg-black/40 p-1 rounded-xl border border-white/5">
               <button 
                   onClick={() => { setIsLogin(true); setMsg(null); }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${isLogin ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all ${isLogin ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500'}`}
               >
                   ログイン
               </button>
               <button 
                   onClick={() => { setIsLogin(false); setMsg(null); }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${!isLogin ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all ${!isLogin ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500'}`}
               >
                   新規登録
               </button>
@@ -124,37 +124,34 @@ const Auth: React.FC<AuthProps> = ({ user, onClose }) => {
         )}
 
         <div className="space-y-1">
-            <h3 className="text-lg font-bold text-white text-center">
-            {isReset ? "パスワード再設定" : (isLogin ? "おかえりなさい！" : "初めまして！")}
+            <h3 className="text-base font-bold text-white text-center">
+            {isReset ? "パスワード再設定" : (isLogin ? "おかえりなさい" : "初めまして")}
             </h3>
-            <p className="text-[10px] text-zinc-500 text-center uppercase tracking-widest">
-            {isReset ? "RESET PASSWORD" : (isLogin ? "SIGN IN TO YOUR SOULMATE" : "CREATE NEW ACCOUNT")}
-            </p>
         </div>
 
         {msg && (
-          <div className={`text-[10px] font-bold p-3 rounded-xl animate-in slide-in-from-top-2 ${msg.type === 'error' ? 'bg-red-950/30 text-red-400 border border-red-500/20' : 'bg-green-950/30 text-green-400 border border-green-500/20'}`}>
+          <div className={`text-[10px] font-bold p-2.5 rounded-xl animate-in slide-in-from-top-2 ${msg.type === 'error' ? 'bg-red-950/30 text-red-400 border border-red-500/20' : 'bg-green-950/30 text-green-400 border border-green-500/20'}`}>
             {msg.text}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="space-y-1.5">
-            <label className="text-[9px] text-zinc-500 font-bold uppercase tracking-tighter ml-1">Email Address</label>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+          <div className="space-y-1">
+            <label className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest ml-1">Email</label>
             <input 
               type="email" 
               required
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white focus:ring-1 focus:ring-pink-500 focus:outline-none transition-all placeholder:text-zinc-700"
+              className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white focus:ring-1 focus:ring-pink-500 focus:outline-none transition-all placeholder:text-zinc-800"
               placeholder="example@mail.com"
             />
           </div>
           
           {!isReset && (
-              <div className="space-y-1.5">
-              <label className="text-[9px] text-zinc-500 font-bold uppercase tracking-tighter ml-1">Password</label>
+              <div className="space-y-1">
+              <label className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest ml-1">Password</label>
               <input 
                   type="password" 
                   required
@@ -162,15 +159,15 @@ const Auth: React.FC<AuthProps> = ({ user, onClose }) => {
                   autoComplete={isLogin ? "current-password" : "new-password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white focus:ring-1 focus:ring-pink-500 focus:outline-none transition-all placeholder:text-zinc-700"
+                  className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white focus:ring-1 focus:ring-pink-500 focus:outline-none transition-all placeholder:text-zinc-800"
                   placeholder="••••••••"
               />
               </div>
           )}
 
           {!isReset && !isLogin && (
-              <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
-                  <label className="text-[9px] text-zinc-500 font-bold uppercase tracking-tighter ml-1">Confirm Password</label>
+              <div className="space-y-1 animate-in fade-in">
+                  <label className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest ml-1">Confirm Password</label>
                   <input 
                       type="password" 
                       required
@@ -178,41 +175,41 @@ const Auth: React.FC<AuthProps> = ({ user, onClose }) => {
                       autoComplete="new-password"
                       value={passwordConfirm}
                       onChange={(e) => setPasswordConfirm(e.target.value)}
-                      className={`w-full bg-black/40 border rounded-xl p-3 text-sm text-white focus:ring-1 focus:ring-pink-500 focus:outline-none transition-all placeholder:text-zinc-700
+                      className={`w-full bg-black/40 border rounded-xl p-3 text-sm text-white focus:ring-1 focus:ring-pink-500 focus:outline-none transition-all placeholder:text-zinc-800
                         ${passwordConfirm && password !== passwordConfirm ? 'border-red-500/30' : 'border-white/5'}
                       `}
-                      placeholder="もう一度入力してね"
+                      placeholder="もう一度入力"
                   />
               </div>
           )}
 
           {!isReset && !isLogin && (
-              <div className="flex items-start gap-2 mt-2 animate-in fade-in">
+              <div className="flex items-start gap-2 mt-1 animate-in fade-in">
                   <input 
                       type="checkbox" 
                       id="agreedToTerms"
                       checked={agreedToTerms}
                       onChange={(e) => setAgreedToTerms(e.target.checked)}
-                      className="w-4 h-4 mt-0.5 rounded-lg border-white/10 bg-black text-pink-600 focus:ring-pink-500 focus:ring-offset-0"
+                      className="w-4 h-4 mt-0.5 rounded border-white/10 bg-black text-pink-600 focus:ring-pink-500 focus:ring-offset-0"
                   />
-                  <label htmlFor="agreedToTerms" className="text-[10px] text-zinc-500 select-none leading-tight">
+                  <label htmlFor="agreedToTerms" className="text-[9px] text-zinc-500 select-none leading-tight">
                       <button type="button" onClick={() => setShowTerms(true)} className="text-pink-400 hover:underline font-bold">利用規約</button>
-                      とプライバシーポリシーに同意して、Rina AIの世界を始めます。
+                      に同意して開始
                   </label>
               </div>
           )}
 
           {!isReset && isLogin && (
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2">
               <input 
                   type="checkbox" 
                   id="rememberMe"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded-lg border-white/10 bg-black text-pink-600 focus:ring-pink-500 focus:ring-offset-0"
+                  className="w-4 h-4 rounded border-white/10 bg-black text-pink-600 focus:ring-pink-500 focus:ring-offset-0"
               />
-              <label htmlFor="rememberMe" className="text-[10px] text-zinc-500 select-none cursor-pointer font-medium">
-                  ログイン状態を保持する
+              <label htmlFor="rememberMe" className="text-[9px] text-zinc-500 select-none cursor-pointer">
+                  ログイン状態を保持
               </label>
             </div>
           )}
@@ -220,17 +217,17 @@ const Auth: React.FC<AuthProps> = ({ user, onClose }) => {
           <button 
             type="submit" 
             disabled={loading || (!isLogin && !isReset && (!agreedToTerms || password !== passwordConfirm))}
-            className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white py-3.5 rounded-2xl font-bold text-sm mt-4 disabled:opacity-30 transition-all shadow-xl shadow-pink-900/20 active:scale-95"
+            className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white py-3.5 rounded-2xl font-bold text-sm mt-2 disabled:opacity-30 transition-all shadow-xl shadow-pink-900/20 active:scale-95"
           >
-            {loading ? "少し待ってね..." : (isReset ? "再設定メールを送信" : (isLogin ? "ログインする" : "新しく始める"))}
+            {loading ? "..." : (isReset ? "再設定メールを送信" : (isLogin ? "ログイン" : "新しく始める"))}
           </button>
 
-          <div className="flex flex-col gap-2 mt-2">
+          <div className="flex flex-col gap-2 mt-1">
             {!isReset && isLogin && (
                 <button 
                     type="button"
                     onClick={() => { setIsReset(true); setMsg(null); }}
-                    className="text-[10px] text-zinc-600 hover:text-zinc-400 text-center transition-colors font-bold uppercase tracking-widest"
+                    className="text-[9px] text-zinc-600 hover:text-zinc-400 text-center transition-colors font-bold uppercase tracking-widest"
                 >
                     Forgot Password?
                 </button>
@@ -239,7 +236,7 @@ const Auth: React.FC<AuthProps> = ({ user, onClose }) => {
                 <button 
                     type="button"
                     onClick={() => { setIsReset(false); setMsg(null); }}
-                    className="text-[10px] text-zinc-600 hover:text-zinc-400 text-center transition-colors font-bold uppercase tracking-widest"
+                    className="text-[9px] text-zinc-600 hover:text-zinc-400 text-center transition-colors font-bold uppercase tracking-widest"
                 >
                     Back to Login
                 </button>
