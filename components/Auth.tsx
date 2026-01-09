@@ -176,7 +176,7 @@ const Auth: React.FC<AuthProps> = ({ user, onClose }) => {
                       autoComplete="new-password"
                       value={passwordConfirm}
                       onChange={(e) => setPasswordConfirm(e.target.value)}
-                      className={`w-full bg-black/40 border rounded-xl p-2.5 text-xs text-white focus:ring-1 focus:ring-pink-500 focus:outline-none transition-all ${passwordConfirm && password !== passwordConfirm ? 'border-red-500/30' : 'border-white/5'}`}
+                      className={`w-full bg-black/40 border rounded-xl p-2.5 text-xs text-white focus:ring-1 focus:ring-pink-500 focus:outline-none transition-all ${!!(passwordConfirm && password !== passwordConfirm) ? 'border-red-500/30' : 'border-white/5'}`}
                       placeholder="もう一度入力"
                   />
               </div>

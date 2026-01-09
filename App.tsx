@@ -130,12 +130,12 @@ const App: React.FC = () => {
   };
 
   const handleDeleteAI = (id: string) => {
-      const original = DEFAULT_AIS.find(def => def.id === id);
+      const originalCheck = DEFAULT_AIS.find(def => def.id === id);
       let nextProfiles;
-      if (original) nextProfiles = aiProfiles.map(p => p.id === id ? original : p);
+      if (originalCheck) nextProfiles = aiProfiles.map(p => p.id === id ? originalCheck : p);
       else nextProfiles = aiProfiles.filter(p => p.id !== id);
       saveCustomAIs(nextProfiles);
-      if (!original) setCurrentAIId(DEFAULT_AIS[0].id);
+      if (!originalCheck) setCurrentAIId(DEFAULT_AIS[0].id);
       setIsAIEditorOpen(false);
   };
 
@@ -238,28 +238,19 @@ const App: React.FC = () => {
       {showOnboarding && <OnboardingModal onClose={() => setShowOnboarding(false)} onOpenDonation={() => { setShowOnboarding(false); setShowDonationModal(true); }} aiName={currentAI.name} />}
 
       <div className="relative z-10 flex flex-col h-full safe-area-inset">
-        <header className="px-4 py-3 flex justify-between items-center bg-black/40 backdrop-blur-md pt-[calc(0.75rem+env(safe-area-inset-top))] border-b border-white/5 shrink-0">
-          <button onClick={() => setIsSidebarOpen(true)} className="p-3 -ml-2 text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-full transition-colors active:scale-90">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7"><path fillRule="evenodd" d="M3 6.75A.75.75 0 013.75 6h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 6.75zM3 12a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 12zm0 5.25a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75z" clipRule="evenodd" /></svg>
+        <header className="px-4 py-2 flex justify-between items-center bg-black/40 backdrop-blur-md pt-[calc(0.5rem+env(safe-area-inset-top))] border-b border-white/5 shrink-0">
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-full transition-colors active:scale-90">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M3 6.75A.75.75 0 013.75 6h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 6.75zM3 12a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 12zm0 5.25a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75z" clipRule="evenodd" /></svg>
           </button>
-          
-          <div className="flex items-center gap-1 text-center">
-            <h1 className="text-base font-light tracking-[0.15em] flex items-center gap-2">KOKORO（心）</h1>
-          </div>
-          
+          <h1 className="text-sm font-light tracking-[0.15em]">KOKORO（心）</h1>
           <div className="flex items-center gap-1">
-             <button onClick={() => setShowDonationModal(true)} className="p-3 text-pink-400 hover:text-pink-300 hover:bg-pink-500/10 rounded-full transition-all active:scale-90" title="支援する">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" /></svg>
-             </button>
-             <button onClick={() => setShowOnboarding(true)} className="p-3 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-full transition-all active:scale-90" title="ガイドを見る">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836c-.149.598.019 1.225.44 1.645l.132.131c.264.264.67.264.933 0l.132-.131c.421-.42.589-1.047.44-1.645l-.709-2.836c-.311-1.243.979-2.279 2.126-1.706l.132.066c.263.132.589.02.721-.243l.066-.132c.132-.264.02-.589-.243-.721l-.132-.066a3.75 3.75 0 0 0-5.25 5.25l.131.132c.264.264.264.67 0 .933l-.131.132a3.75 3.75 0 0 0-5.25-5.25l.132.066Z" clipRule="evenodd" /><path d="M12 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" /></svg>
-             </button>
+             <button onClick={() => setShowDonationModal(true)} className="p-2 text-pink-400 hover:text-pink-300 transition-all active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" /></svg></button>
           </div>
         </header>
 
-        <div className="flex justify-center gap-4 py-2 border-b border-zinc-800/50 bg-black/20 shrink-0">
+        <div className="flex justify-center gap-4 py-1.5 border-b border-zinc-800/50 bg-black/20 shrink-0">
           {[{ id: 'voice', label: '通話', icon: '📞' }, { id: 'chat', label: 'チャット', icon: '💬' }].map(tab => (
-            <button key={tab.id} onClick={() => switchTab(tab.id as Tab)} className={`px-5 py-2 rounded-full text-xs font-bold tracking-wider flex items-center gap-2 transition-all ${activeTab === tab.id ? 'bg-pink-900/30 text-pink-200 border border-pink-500/30 shadow-lg shadow-pink-900/10' : 'text-zinc-500 hover:text-zinc-300'}`}>
+            <button key={tab.id} onClick={() => switchTab(tab.id as Tab)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider flex items-center gap-1.5 transition-all ${activeTab === tab.id ? 'bg-pink-900/30 text-pink-200 border border-pink-500/30 shadow-lg shadow-pink-900/10' : 'text-zinc-500 hover:text-zinc-300'}`}>
               <span>{tab.icon}</span> {tab.label}
             </button>
           ))}
@@ -267,50 +258,48 @@ const App: React.FC = () => {
 
         <main className="flex-grow relative w-full overflow-hidden flex flex-col">
           {activeTab === 'voice' && (
-            <div className="w-full h-full flex flex-col items-center justify-between py-6 relative fade-in">
+            <div className="w-full h-full flex flex-col items-center justify-center py-4 relative fade-in overflow-hidden">
                
                {/* Top Transcription: AI Speaker */}
-               <div className="w-full px-6 min-h-[60px] flex flex-col items-center justify-center z-30">
+               <div className="w-full px-6 min-h-[60px] flex items-center justify-center z-30 mb-2">
                   {aiTranscript && (
-                    <div className="animate-in fade-in slide-in-from-top-4 bg-black/70 backdrop-blur-xl px-5 py-3 rounded-2xl border border-pink-500/20 max-w-[95%] shadow-2xl">
-                        <p className="text-pink-100 text-sm font-medium text-center leading-relaxed italic">
-                          "{aiTranscript}"
-                        </p>
+                    <div className="animate-in fade-in slide-in-from-top-4 bg-black/60 backdrop-blur-xl px-4 py-2.5 rounded-2xl border border-pink-500/20 max-w-[95%] shadow-xl">
+                        <p className="text-pink-100 text-xs font-medium text-center leading-relaxed italic">"{aiTranscript}"</p>
                     </div>
                   )}
                </div>
 
                {/* Center: Visualizer & Avatar */}
-               <div className="relative w-full max-w-lg aspect-square flex items-center justify-center">
+               <div className="relative w-full max-w-[280px] sm:max-w-[420px] aspect-square flex items-center justify-center my-4">
                   <div className={`absolute inset-0 transition-opacity duration-1000 ${isConnected ? 'opacity-100' : 'opacity-30 blur-md'}`}>
                     <Visualizer isActive={isConnected} analyzerRef={audioAnalyzerRef} mode={mode} />
                   </div>
-                  <div className={`absolute transition-all duration-700 ${isConnected ? 'scale-110' : 'scale-100'}`}>
-                    {renderAvatar(currentAI.gender, "w-40 h-40 md:w-56 md:h-56")}
+                  <div className={`absolute transition-all duration-700 ${isConnected ? 'scale-105' : 'scale-95'}`}>
+                    {renderAvatar(currentAI.gender, "w-28 h-28 md:w-48 md:h-48")}
                   </div>
                </div>
 
-               {/* Bottom Transcription: User Listener */}
-               <div className="w-full px-6 min-h-[40px] flex flex-col items-center justify-center z-30">
+               {/* User Transcript */}
+               <div className="w-full px-6 min-h-[40px] flex items-center justify-center z-30 mt-2 mb-6">
                   {userTranscript && (
-                    <div className="animate-in fade-in slide-in-from-bottom-4 bg-white/5 backdrop-blur-lg px-4 py-2 rounded-xl border border-zinc-700/50 max-w-[85%]">
-                      <p className="text-zinc-300 text-xs font-medium text-center">{userTranscript}</p>
+                    <div className="animate-in fade-in slide-in-from-bottom-4 bg-white/5 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-zinc-700/50 max-w-[85%]">
+                      <p className="text-zinc-400 text-[10px] font-medium text-center">{userTranscript}</p>
                     </div>
                   )}
                </div>
 
-               {/* Controls */}
-               <div className="flex flex-col items-center gap-5 z-20 shrink-0">
-                  <button onClick={handleToggleConnection} disabled={isConnecting || !isConfigValid} className={`relative group overflow-hidden px-14 py-5 rounded-full font-bold tracking-[0.2em] text-sm transition-all duration-500 touch-manipulation shadow-2xl shadow-pink-900/20 ${isConnected ? 'bg-red-500/10 text-red-500 border border-red-500/40' : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white active:scale-95'}`}>
+               {/* Controls - Positioned even higher for better ergonomics */}
+               <div className="flex flex-col items-center gap-4 z-40 shrink-0 mb-16 md:mb-24">
+                  <button onClick={handleToggleConnection} disabled={isConnecting || !isConfigValid} className={`relative group overflow-hidden px-16 py-4 rounded-full font-bold tracking-[0.2em] text-[12px] transition-all duration-500 touch-manipulation shadow-2xl ${isConnected ? 'bg-red-500/10 text-red-500 border border-red-500/40' : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white active:scale-95'}`}>
                     <span className="relative z-10">{isConnecting ? '接続中...' : isConnected ? 'さよなら' : `${currentAI.name}と話す`}</span>
                   </button>
-                  <button onClick={() => setShowMemoryModal(true)} className="flex items-center gap-2 text-zinc-500 hover:text-pink-300 transition-all text-xs font-bold px-5 py-2.5 rounded-full border border-zinc-800 hover:border-pink-500/30 hover:bg-pink-900/10 backdrop-blur-md">
+                  <button onClick={() => setShowMemoryModal(true)} className="flex items-center gap-2 text-zinc-400 hover:text-pink-300 transition-all text-[11px] font-bold px-6 py-3 rounded-full border border-zinc-800 hover:border-pink-500/30 bg-zinc-900/60 backdrop-blur-md active:scale-95 shadow-xl">
                     <span>🧠</span><span>心に刻む</span>
                   </button>
                </div>
             </div>
           )}
-          {activeTab === 'chat' && <div className="flex-grow w-full max-w-2xl mx-auto p-4 h-full fade-in overflow-hidden"><TextChat config={config} aiProfile={currentAI} memoryContext={getMemoryContext()} onNewMemory={addMemory} onOpenMemoryModal={() => setShowMemoryModal(true)}/></div>}
+          {activeTab === 'chat' && <div className="flex-grow w-full max-w-2xl mx-auto p-3 h-full fade-in overflow-hidden"><TextChat config={config} aiProfile={currentAI} memoryContext={getMemoryContext()} onNewMemory={addMemory} onOpenMemoryModal={() => setShowMemoryModal(true)}/></div>}
         </main>
       </div>
       
@@ -318,48 +307,42 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[200] flex">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)}></div>
             <aside className="relative w-[85%] max-w-sm h-full bg-[#0a0a0a] border-r border-zinc-800 shadow-2xl flex flex-col animate-in slide-in-from-left duration-300 overflow-hidden">
-                <div className="p-5 border-b border-zinc-800 flex justify-between items-center bg-black/40 pt-[calc(1.25rem+env(safe-area-inset-top))] shrink-0">
-                    <h2 className="font-bold text-zinc-100 flex items-center gap-2 tracking-widest uppercase"><span className="text-xl">🌟</span> Partner</h2>
-                    <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-zinc-500 hover:text-white active:scale-90">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" /></svg>
-                    </button>
+                <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-black/40 pt-[calc(1rem+env(safe-area-inset-top))] shrink-0">
+                    <h2 className="font-bold text-zinc-100 flex items-center gap-2 tracking-widest uppercase text-sm"><span className="text-lg">🌟</span> Partner</h2>
+                    <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-zinc-500 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" /></svg></button>
                 </div>
                 
-                <div className="flex-grow overflow-y-auto p-4 space-y-6 custom-scrollbar">
-                    {/* Partners Section */}
-                    <div className="space-y-3">
+                <div className="flex-grow overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                    <div className="space-y-2">
                         {aiProfiles.map(ai => (
-                            <div key={ai.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${currentAIId === ai.id ? 'bg-pink-500/10 border-pink-500/50' : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'}`} onClick={() => { setCurrentAIId(ai.id); if(isConnected) disconnect(); setIsSidebarOpen(false); }}>
-                                <div className="flex items-center gap-3">{renderAvatar(ai.gender, "w-12 h-12")}<div><p className="font-bold text-sm">{ai.name}</p><p className="text-[10px] text-zinc-500 uppercase">{ai.relationship}</p></div></div>
-                                <button onClick={(e) => { e.stopPropagation(); setEditingAI(ai); setIsAIEditorOpen(true); setIsSidebarOpen(false); }} className="p-2 text-zinc-500 hover:text-pink-400 active:scale-110">⚙️</button>
+                            <div key={ai.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${currentAIId === ai.id ? 'bg-pink-500/10 border-pink-500/50' : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'}`} onClick={() => { setCurrentAIId(ai.id); if(isConnected) disconnect(); setIsSidebarOpen(false); }}>
+                                <div className="flex items-center gap-3">{renderAvatar(ai.gender, "w-10 h-10")}<div><p className="font-bold text-xs">{ai.name}</p><p className="text-[9px] text-zinc-500 uppercase">{ai.relationship}</p></div></div>
+                                <button onClick={(e) => { e.stopPropagation(); setEditingAI(ai); setIsAIEditorOpen(true); setIsSidebarOpen(false); }} className="p-1.5 text-zinc-500 hover:text-pink-400">⚙️</button>
                             </div>
                         ))}
-                        <button onClick={() => { setEditingAI(undefined); setIsAIEditorOpen(true); setIsSidebarOpen(false); }} className="w-full py-4 rounded-2xl border border-dashed border-zinc-700 text-zinc-500 hover:text-white hover:border-zinc-500 transition-all text-sm font-bold flex items-center justify-center gap-2 active:scale-95"><span>+</span> 新しい絆を作る</button>
+                        
+                        {/* ADD AI BUTTON RESTORED */}
+                        <button 
+                            onClick={() => { setEditingAI(undefined); setIsAIEditorOpen(true); setIsSidebarOpen(false); }}
+                            className="w-full flex items-center justify-center gap-2 p-3 mt-4 rounded-xl border border-dashed border-zinc-700 text-zinc-500 hover:text-pink-400 hover:border-pink-500/50 transition-all active:scale-95"
+                        >
+                            <span className="text-lg">＋</span>
+                            <span className="text-[11px] font-bold uppercase tracking-widest">新しいAIを作成</span>
+                        </button>
                     </div>
-
-                    {/* Topics Section */}
-                    <div className="pt-6 border-t border-zinc-800">
+                    <div className="pt-4 border-t border-zinc-800">
                         <MemoryManager memories={memories} onUpdate={updateMemory} onDelete={deleteMemory} onAdd={addMemory} />
                     </div>
                 </div>
 
-                {/* Support Section */}
-                <div className="shrink-0 p-4 border-t border-zinc-800 bg-black/80 backdrop-blur-xl pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3">
-                    <button 
-                        onClick={() => { setShowDonationModal(true); setIsSidebarOpen(false); }}
-                        className="relative w-full overflow-hidden flex items-center gap-4 p-5 rounded-[2rem] bg-gradient-to-br from-pink-600 via-purple-600 to-indigo-700 text-white shadow-2xl shadow-pink-900/40 group active:scale-95 transition-all"
-                    >
-                        <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] pointer-events-none"></div>
-                        <div className="relative z-10 w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">💌</div>
-                        <div className="relative z-10 text-left">
-                            <p className="font-black text-sm tracking-widest uppercase">Support Project</p>
-                            <p className="text-[10px] text-pink-100/80 font-medium">開発者を支援する（100円〜）</p>
-                        </div>
+                <div className="shrink-0 p-4 border-t border-zinc-800 bg-black/80 backdrop-blur-xl pb-[calc(0.5rem+env(safe-area-inset-bottom))] space-y-2">
+                    <button onClick={() => { setShowDonationModal(true); setIsSidebarOpen(false); }} className="w-full flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-br from-pink-600 to-purple-700 text-white shadow-lg active:scale-95 transition-all">
+                        <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-lg">💌</div>
+                        <div className="text-left"><p className="font-bold text-xs">Support</p><p className="text-[9px] opacity-80">支援して開発を応援</p></div>
                     </button>
-
                     <div className="flex gap-2">
-                        <button onClick={() => { setShowOnboarding(true); setIsSidebarOpen(false); }} className="flex-1 py-3 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 text-blue-400 text-xs font-bold active:scale-95">❓ ガイド</button>
-                        <button onClick={handleLogout} className="flex-1 py-3 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 text-zinc-400 text-xs font-bold active:scale-95">🚪 ログアウト</button>
+                        <button onClick={() => { setShowOnboarding(true); setIsSidebarOpen(false); }} className="flex-1 py-2 rounded-xl bg-zinc-800/50 text-blue-400 text-[10px] font-bold">❓ ガイド</button>
+                        <button onClick={handleLogout} className="flex-1 py-2 rounded-xl bg-zinc-800/50 text-zinc-400 text-[10px] font-bold">🚪 ログアウト</button>
                     </div>
                 </div>
             </aside>
@@ -367,11 +350,9 @@ const App: React.FC = () => {
       )}
 
       <style>{`
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
         .safe-area-inset { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
-        @media (max-width: 640px) { main { height: calc(100dvh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); } }
       `}</style>
     </div>
   );
