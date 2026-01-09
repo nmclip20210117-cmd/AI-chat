@@ -215,7 +215,7 @@ const Auth: React.FC<AuthProps> = ({ user, onClose }) => {
 
           <button 
             type="submit" 
-            disabled={loading || (!isLogin && !isReset && (!agreedToTerms || (password && password !== passwordConfirm)))}
+            disabled={!!(loading || (!isLogin && !isReset && (!agreedToTerms || (password && password !== passwordConfirm))))}
             className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white py-3 rounded-xl font-bold text-xs mt-1 disabled:opacity-30 transition-all shadow-lg active:scale-95"
           >
             {loading ? "..." : (isReset ? "メールを送信" : (isLogin ? "ログイン" : "新しく始める"))}

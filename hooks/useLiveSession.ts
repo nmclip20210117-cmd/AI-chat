@@ -198,6 +198,7 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                         if (serverContent?.interrupted) {
                             stopAllAudio();
                             setMode('listening');
+                            // On interruption, we clear the AI transcript immediately
                             aiTranscriptRef.current = "";
                             setAiTranscript("");
                             return;
@@ -218,6 +219,8 @@ export const useLiveSession = (): UseLiveSessionReturn => {
 
                         // Accumulate user transcription
                         if (serverContent?.inputTranscription?.text) {
+                            // If user starts speaking and we were still showing old AI text, we clear AI text.
+                            // But for now, we just append.
                             userTranscriptRef.current += serverContent.inputTranscription.text;
                             setUserTranscript(userTranscriptRef.current);
                         }
@@ -227,19 +230,11 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                             aiTranscriptRef.current += serverContent.outputTranscription.text;
                             setAiTranscript(aiTranscriptRef.current);
                         }
-
-                        // Reset transcripts on turn complete
-                        if (serverContent?.turnComplete) {
-                            // We don't clear immediately to let user read, 
-                            // but we clear the accumulators for the next turn.
-                            userTranscriptRef.current = "";
-                            aiTranscriptRef.current = "";
-                        }
                         
                         const base64Audio = serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
                         if (base64Audio && outputAudioContextRef.current) {
                             setMode('speaking');
-                            // Clear user transcript when AI starts speaking
+                            // Start of new AI response: clear user's last transcription from UI
                             setUserTranscript("");
                             userTranscriptRef.current = "";
 
@@ -254,7 +249,12 @@ export const useLiveSession = (): UseLiveSessionReturn => {
                             sourcesRef.current.add(source);
                             source.addEventListener('ended', () => {
                                 sourcesRef.current.delete(source);
-                                if (sourcesRef.current.size === 0) setMode('listening');
+                                if (sourcesRef.current.size === 0) {
+                                    setMode('listening');
+                                    // When AI finished speaking, we keep the AI transcript visible 
+                                    // but we clear its buffer for the next time it speaks.
+                                    aiTranscriptRef.current = ""; 
+                                }
                             });
                         }
                     },
